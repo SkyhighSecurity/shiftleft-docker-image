@@ -1,0 +1,18 @@
+<ul>
+<li>PROMOTION: <code>@Wither</code> has been promoted to the main package, renamed to <code>@With</code>. Otherwise, no changes have been made to the annotation. The old experimental annotation will remain for a few versions as a deprecated annotation. If you had <code>lombok.config</code> configuration for this annotation, the configuration keys for this feature have been renamed.</li>
+<li>FEATURE: You can now configure a custom logger framework using the new <code>@CustomLog</code> annotation in combination with the <code>lombok.log.custom.declaration</code> configuration key. See the log documentation for more information. Pullrequest #2086 with thanks to Adam Juraszek.</li>
+<li>ENHANCEMENT: Thanks to Mark Haynes, the <code>staticConstructor</code> will now also be generated if a (private) constructor already exists.</li>
+<li>ENHANCEMENT: <code>val</code> is now capable of decoding the type of convoluted expressions (particularly if the right hand side involves lambdas and conditional (ternary) expressions). Pull Request #2109 with thanks to Alexander Bulgakov.</li>
+<li>ENHANCEMENT: You can now configure the generated builder class name via the config system, using key <code>lombok.builder.className</code>. See the Builder documentation and SuperBuilder documentation</li>
+<li>ENHANCEMENT: If you mix up eclipse's non-null support, such as <code>@NonNullByDefault</code>, with lombok's <code>@NonNull</code>, you get a bunch of warnings about dead code that are inappropriate. These warnings are now suppressed, thanks to a contribution from Till Brychcy! Pull Request #2155</li>
+<li>ENHANCEMENT: <code>@NonNull</code> can now also generate checks using jdk's <code>Objects.requireNonNull</code> or Guava's <code>Preconditions.checkNotNull</code>.</li>
+<li>EXPERIMENT: Lombok is working together with checkerframework to enable detection of improper builder use (such as forgetting to set a mandatory property prior to calling <code>build()</code>). This experiment can be turned on by adding <code>checkerframework = true</code> to your <code>lombok.config</code> file.</li>
+<li>BUGFIX: Using <code>@JsonProperty</code> or <code>@JsonValue</code> on a field in combination with <code>@Setter</code> or <code>@Data</code> would sometimes throw a ClassCastException during compilation.</li>
+<li>BUGFIX: Delombok would turn something like <code>List&lt;byte[]&gt;...</code> in a method parameter to <code>List&lt;byte...&gt;...</code></li>
+<li>BUGFIX: Javac would generate the wrong equals and hashCode if a type-use annotation was put on an array type field</li>
+<li>BUGFIX: Eclipse 2019-06 + JDK-12 compatibility + an <code>@Singular</code> builder entry would produce a cascade of error dialogs.</li>
+<li>BUGFIX: Javac would throw a NullPointerException if the package-info.java did not contain a package declaration.</li>
+<li>BUGFIX: Javac sets incorrect annotated type on constructor, getter and setter.</li>
+<li>IMPROBABLE BREAKING CHANGE: Stricter validation of configuration keys dealing with identifiers and types (<code>lombok.log.fieldName</code>, <code>lombok.fieldNameConstants.innerTypeName</code>, <code>lombok.copyableAnnotations</code>).</li>
+<li>IMPROBABLE BREAKING CHANGE: The fields generated inside builders for fields with defaults (with <code>@Builder</code> on a class with fields marked <code>@Default</code>) now have <code>$value</code> as the name; direct manipulation of these fields is not advised because there is an associated <code>$set</code> variable that also needs to be taken into account.</li>
+</ul>
