@@ -14,9 +14,13 @@ If you are using a SSO solution with Skyhigh, configure an exclusion for this us
 First, generate a list of files to be submitted to Skyhigh for inspection relative to path that you will map to the container's /data path. Next, place your Skyhigh username and password, the name of the target IaaS provider, and Skyhigh environment URL into environment variables as follows:
 
 SKYHIGH_USERNAME: Your Skyhigh username / email address
+
 SKYHIGH_PASSWORD: Your Skyhigh password
+
 IAAS_PROVIDER: The name of the IAAS provider which tells Skyhigh which active policies to evaluate against. Valid options are: aws, gcp, azure.
+
 SKYHIGH_ENV: The region-specific base-url for the Skyhigh API. Valid options include: https://www.myshn.net , https://www.myshn.eu , and https://www.myshn.ca. Generally this URL will be displayed when you are logged into your Skyhigh dashboard.
+
 
 Finally, execute the docker run command mapping the /data volume and passing the environment variables as parameters in this specific order:
 
@@ -40,7 +44,7 @@ fi
 ```
 
 # FAQ
-### Can I specify a policy group to evaluate against
+### Can I evaluate a specific Skyhigh policy group?
 This is presently not supported.
 
 ### Can I make these API calls myself instead of using this container?
