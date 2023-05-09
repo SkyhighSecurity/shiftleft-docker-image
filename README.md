@@ -20,6 +20,7 @@ SKYHIGH_ENV: The region-specific base-url for the Skyhigh API. Valid options inc
 
 Finally, execute the docker run command mapping the /data volume and passing the environment variables as parameters in this specific order:
 
+
 <docker run command> <list of files> $SKYHIGH_USERNAME $SKYHIGH_PASSWORD "/data" $IAAS_PROVIDER $SKYHIGH_ENV
 
 The example script below, when executed within that path, will find all .yaml, .yml, .json, and .tf files and write the list to iac-inspection.txt. It then sanitized the file list of extra characters, sets the environment variables, and executes the docker command.
