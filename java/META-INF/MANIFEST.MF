@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-Archiver-Version: Plexus Archiver
-Built-By: kc1
-Created-By: Apache Maven 3.6.1
-Build-Jdk: 1.8.0_211
-Main-Class: com.shn.shiftleft.ShiftLeftInlineApplication
-
