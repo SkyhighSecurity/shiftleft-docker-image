@@ -16,7 +16,7 @@ First, generate a list of files to be submitted to Skyhigh for inspection relati
 SKYHIGH_USERNAME: Your Skyhigh username / email address
 SKYHIGH_PASSWORD: Your Skyhigh password
 IAAS_PROVIDER: The name of the IAAS provider which tells Skyhigh which active policies to evaluate against. Valid options are: aws, gcp, azure.
-SKYHIGH_ENV: The region-specific base-url for the Skyhigh API. Valid options include: https://www.myshn.net , https://www.myshn.eu , and https://www.myshn.ca
+SKYHIGH_ENV: The region-specific base-url for the Skyhigh API. Valid options include: https://www.myshn.net , https://www.myshn.eu , and https://www.myshn.ca. Generally this URL will be displayed when you are logged into your Skyhigh dashboard.
 
 Finally, execute the docker run command mapping the /data volume and passing the environment variables as parameters in this specific order:
 
