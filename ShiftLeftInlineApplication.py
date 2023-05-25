@@ -106,7 +106,7 @@ def update_iam_token(shift_left_inline_data):
     if shift_left_inline_data.bps_tenant_id:
         headers['BPS-TENANT-ID'] = shift_left_inline_data.bps_tenant_id
     
-    request = requests.post(shift_left_inline_data.environment + "/neo/neo-auth-service/oauth/token?grant_type=password&token_type=iam", headers=headers)
+    request = requests.post(shift_left_inline_data.environment + "/shnapi/rest/external/api/v1/token?grant_type=password&token_type=iam", headers=headers)
 
     if request.status_code != 200:
         error_msg = f"Unable to fetch IAM token for user: {shift_left_inline_data.user_name}"
