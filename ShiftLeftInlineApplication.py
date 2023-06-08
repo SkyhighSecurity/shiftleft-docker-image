@@ -6,6 +6,7 @@ from typing import List, Dict, Any
 import sys
 from requests.exceptions import RequestException, HTTPError
 import requests.sessions
+from requests.auth import HTTPBasicAuth
 
 class ShiftLeftInlineException(Exception):
     pass
@@ -99,14 +100,15 @@ def perform_shift_left(args: List[str]):
 
 def update_iam_token(shift_left_inline_data):
     headers = {
-        'Content-Type': 'application/json',
-        'x-auth-username': shift_left_inline_data.user_name,
-        'x-auth-password': shift_left_inline_data.password
+        'Content-Type': 'application/json'
     }
+
+    auth = HTTPBasicAuth('shift_left_inline_data.user_name', 'shift_left_inline_data.password')
+
     if shift_left_inline_data.bps_tenant_id:
         headers['BPS-TENANT-ID'] = shift_left_inline_data.bps_tenant_id
     
-    request = requests.post(shift_left_inline_data.environment + "/shnapi/rest/external/api/v1/token?grant_type=password&token_type=iam", headers=headers)
+    request = requests.post(shift_left_inline_data.environment + "/shnapi/rest/external/api/v1/token?grant_type=password&token_type=iam", headers=headers, auth=auth)
 
     if request.status_code != 200:
         error_msg = f"Unable to fetch IAM token for user: {shift_left_inline_data.user_name}"
