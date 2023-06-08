@@ -100,10 +100,12 @@ def perform_shift_left(args: List[str]):
 
 def update_iam_token(shift_left_inline_data):
     headers = {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'x-auth-username': shift_left_inline_data.user_name,
+        'x-auth-password': shift_left_inline_data.password
     }
 
-    auth = HTTPBasicAuth('shift_left_inline_data.user_name', 'shift_left_inline_data.password')
+    auth = HTTPBasicAuth({shift_left_inline_data.user_name}, {shift_left_inline_data.password})
 
     if shift_left_inline_data.bps_tenant_id:
         headers['BPS-TENANT-ID'] = shift_left_inline_data.bps_tenant_id
