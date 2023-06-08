@@ -105,7 +105,7 @@ def update_iam_token(shift_left_inline_data):
         'x-auth-password': shift_left_inline_data.password
     }
 
-    auth = HTTPBasicAuth({shift_left_inline_data.user_name}, {shift_left_inline_data.password})
+    auth = HTTPBasicAuth(shift_left_inline_data.user_name, shift_left_inline_data.password)
 
     if shift_left_inline_data.bps_tenant_id:
         headers['BPS-TENANT-ID'] = shift_left_inline_data.bps_tenant_id
