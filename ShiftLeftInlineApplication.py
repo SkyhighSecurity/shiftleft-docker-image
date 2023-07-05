@@ -103,6 +103,7 @@ def perform_shift_left(args: List[str]):
 
     if critical_violated_files:
         raise ShiftLeftInlineException(f"Failing the build, since critical violations were found.")
+        sys.exit(5)
 
 def update_iam_token(shift_left_inline_data):
     headers = {
@@ -179,6 +180,8 @@ def submit_file_for_scan(file_name: str, shift_left_inline_data: Dict[str, Any])
 
     payload = {'filename': file_name}
 
+    print("Scanning, ", file_name)
+
     files = [
         ('templateFile',(file_name,open(os.path.join(shift_left_inline_data.clone_dir, file_name))))
     ]
@@ -204,6 +207,7 @@ def submit_file_for_scan(file_name: str, shift_left_inline_data: Dict[str, Any])
             return submit_file_for_scan(file_name, shift_left_inline_data)
         print(f"Error while submitting the file: {file_name} for scan due to : {str(e)}")
         raise e
+        sys.exit(1)
     else:
         if response.status_code == 429:
             time.sleep(60)
