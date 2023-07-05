@@ -22,6 +22,7 @@ class ShiftLeftInlineData:
         self.bps_tenant_id = ""
         self.access_token = ""
         self.iam_token = ""
+        self.nonzero_keywords = ""
 
 def strip_leading_dot_slash(filename: str) -> str:
     if filename.startswith("./"):
@@ -36,8 +37,9 @@ def perform_shift_left(args: List[str]):
     shift_left_inline_data.clone_dir = args[3]
     shift_left_inline_data.csp_name = args[4]
     shift_left_inline_data.environment = args[5]
-    if len(args) == 7:
-        shift_left_inline_data.bps_tenant_id = args[6]
+    shift_left_inline_data.nonzero_keywords = args[6]
+    if len(args) == 8:
+        shift_left_inline_data.bps_tenant_id = args[7]
 
     if not shift_left_inline_data.changes:
         print("Exiting, since there are no changes available to perform evaluation")
@@ -83,11 +85,15 @@ def perform_shift_left(args: List[str]):
             violation_details = scan_eval_response["message"] # json.loads(scan_eval_response["message"])
             violation_count = violation_details["violation_count"]
             policies_violated = violation_details["policies_violated"]
+            
+            critical_violations, noncritical_violations = separate_violations(policies_violated, shift_left_inline_data.nonzero_keywords)
             file_name = violation_details["file_name"]
 
             if violation_count > 0:
                 violated_files.append(file_name)
-                msg = f"{violation_count} violations were found for the file: {file_name}. Violated the policies: {policies_violated}"
+                msg = f"{len(noncritical_violations)} non-critical violations were found for the file: {file_name}. Policies: {noncritical_violations}"
+                msg = f"{len(critical_violations)} critical violations were found for the file: {file_name}. Policies: {critical_violations}"
+                critical_violated_files = True
                 print(msg)
                 break
 
@@ -95,8 +101,8 @@ def perform_shift_left(args: List[str]):
                 print(f"No violations were found for the file: {file_name}")
                 break
 
-    if violated_files:
-        raise ShiftLeftInlineException(f"Failing the build, since violations were found for the files: {', '.join(violated_files)}.")
+    if critical_violated_files:
+        raise ShiftLeftInlineException(f"Failing the build, since critical violations were found.")
 
 def update_iam_token(shift_left_inline_data):
     headers = {
@@ -155,6 +161,17 @@ def format_prepped_request(prepped, encoding=None):
     headers = '\n'.join(['{}: {}'.format(*hv) for hv in prepped.headers.items()])
     return f"""{prepped.method} {prepped.path_url} HTTP/1.1 {headers} {body}"""
 
+def separate_violations(violations, keyword):
+    critical_violations = []
+    noncritical_violations = []
+
+    for item in violations:
+        if keyword in item:
+            critical_violations.append(item)
+        else:
+            noncritical_violations.append(item)
+
+    return critical_violations, noncritical_violations
 
 def submit_file_for_scan(file_name: str, shift_left_inline_data: Dict[str, Any]):
 
