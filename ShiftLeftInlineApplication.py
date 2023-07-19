@@ -93,7 +93,8 @@ def perform_shift_left(args: List[str]):
                 violated_files.append(file_name)
                 msg = f"{len(noncritical_violations)} non-critical violations were found for the file: {file_name}. Policies: {noncritical_violations}"
                 msg = f"{len(critical_violations)} critical violations were found for the file: {file_name}. Policies: {critical_violations}"
-                critical_violated_files = True
+                if critical_violations:
+                    critical_violated_files = True
                 print(msg)
                 break
 
