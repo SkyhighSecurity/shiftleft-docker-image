@@ -102,7 +102,7 @@ def perform_shift_left(args: List[str]):
                 print(f"No violations were found for the file: {file_name}")
                 break
 
-    if critical_violated_files:
+    if critical_violated_files == True:
         raise ShiftLeftInlineException(f"Failing the build, since critical violations were found.")
         sys.exit(5)
 
