@@ -172,28 +172,30 @@ def submit_file_for_scan(file_name: str, shift_left_inline_data: Dict[str, Any])
 
     session = requests.Session()
 
-    try:
-        req = requests.Request('POST', url, headers=headers, data=payload, files=files)
-        prepped = session.prepare_request(req)
-#        print("Sending request:")
-#        print(format_prepped_request(prepped, 'utf8'))
+    while True:
+        try:
+            req = requests.Request('POST', url, headers=headers, data=payload, files=files)
+            prepped = session.prepare_request(req)
+    #        print("Sending request:")
+    #        print(format_prepped_request(prepped, 'utf8'))
 
-        response = session.send(prepped, verify=True)
-#        print("HTTP Response:", response.status_code)
-#        print(response.text)
-    except RequestException as e:
-        if isinstance(e, HTTPError) and e.response.status_code == 401:
-            update_access_token(shift_left_inline_data)
-            return submit_file_for_scan(file_name, shift_left_inline_data)
-        print(f"Error while submitting the file: {file_name} for scan due to : {str(e)}")
-        raise e
-    else:
-        if response.status_code == 429:
-            time.sleep(60)
-            return submit_file_for_scan(file_name, shift_left_inline_data)
-        print(f"Successfully submitted the file: {file_name} for scan")
-        return {"status_code": response.status_code, "text": response.text}
-
+            response = session.send(prepped, verify=True)
+    #        print("HTTP Response:", response.status_code)
+    #        print(response.text)
+        except RequestException as e:
+            if isinstance(e, HTTPError) and e.response.status_code == 401:
+                update_access_token(shift_left_inline_data)
+                return submit_file_for_scan(file_name, shift_left_inline_data)
+            print(f"Error while submitting {file_name} for scan due to : {str(e)}")
+            raise e
+        else:
+            if response.status_code == 429:
+                print(f"Server is busy (reponse code 429), trying {file_name} again in 60 seconds.")
+                time.sleep(60)
+            else:   
+                print(f"Successfully submitted {file_name} for scan")
+                return {"status_code": response.status_code, "text": response.text}
+    
 if __name__ == "__main__":
     perform_shift_left(sys.argv[1:])
 
