@@ -159,9 +159,7 @@ def format_prepped_request(prepped, encoding=None):
 def submit_file_for_scan(file_name: str, shift_left_inline_data: Dict[str, Any]):
 
     url = f'{shift_left_inline_data.environment}/neo/config-audit/devops/v1/scan?service={shift_left_inline_data.csp_name}'
-
     payload = {'filename': file_name}
-
     files = [
         ('templateFile',(file_name,open(os.path.join(shift_left_inline_data.clone_dir, file_name))))
     ]
@@ -176,12 +174,7 @@ def submit_file_for_scan(file_name: str, shift_left_inline_data: Dict[str, Any])
         try:
             req = requests.Request('POST', url, headers=headers, data=payload, files=files)
             prepped = session.prepare_request(req)
-    #        print("Sending request:")
-    #        print(format_prepped_request(prepped, 'utf8'))
-
             response = session.send(prepped, verify=True)
-    #        print("HTTP Response:", response.status_code)
-    #        print(response.text)
         except RequestException as e:
             if isinstance(e, HTTPError) and e.response.status_code == 401:
                 update_access_token(shift_left_inline_data)
