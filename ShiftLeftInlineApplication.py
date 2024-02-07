@@ -159,22 +159,32 @@ def format_prepped_request(prepped, encoding=None):
 def submit_file_for_scan(file_name: str, shift_left_inline_data: Dict[str, Any]):
 
     url = f'{shift_left_inline_data.environment}/neo/config-audit/devops/v1/scan?service={shift_left_inline_data.csp_name}'
-    payload = {'filename': file_name}
-    files = [
-        ('templateFile',(file_name,open(os.path.join(shift_left_inline_data.clone_dir, file_name))))
-    ]
 
-    headers = {
-        'x-access-token': shift_left_inline_data.access_token
-    }
-
-    session = requests.Session()
 
     while True:
         try:
+            payload = {'filename': file_name}
+            files = [
+                ('templateFile',(file_name,open(os.path.join(shift_left_inline_data.clone_dir, file_name))))
+            ]
+
+            headers = {
+                'x-access-token': shift_left_inline_data.access_token
+            }
+
+            session = requests.Session()
             req = requests.Request('POST', url, headers=headers, data=payload, files=files)
             prepped = session.prepare_request(req)
             response = session.send(prepped, verify=True)
+            session.close
+
+            files_size = 0
+            for _, file_info in files:
+                _, file_object = file_info
+                file_object.seek(0, os.SEEK_END)
+                files_size += file_object.tell()
+                file_object.close()
+
         except RequestException as e:
             if isinstance(e, HTTPError) and e.response.status_code == 401:
                 update_access_token(shift_left_inline_data)
@@ -186,9 +196,8 @@ def submit_file_for_scan(file_name: str, shift_left_inline_data: Dict[str, Any])
                 print(f"Server is busy (reponse code 429), trying {file_name} again in 60 seconds.")
                 time.sleep(60)
             else:   
-                print(f"Successfully submitted {file_name} for scan")
+                print(f"Successfully submitted {file_name} ({files_size} bytes) for scan")
                 return {"status_code": response.status_code, "text": response.text}
     
 if __name__ == "__main__":
     perform_shift_left(sys.argv[1:])
-
