@@ -7,6 +7,14 @@ import sys
 from requests.exceptions import RequestException, HTTPError
 import requests.sessions
 from requests.auth import HTTPBasicAuth
+import logging
+import time
+
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.DEBUG,
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 class ShiftLeftInlineException(Exception):
     pass
@@ -40,7 +48,7 @@ def perform_shift_left(args: List[str]):
         shift_left_inline_data.bps_tenant_id = args[6]
 
     if not shift_left_inline_data.changes:
-        print("Exiting, since there are no changes available to perform evaluation")
+        logging.info("Exiting, since there are no changes available to perform evaluation")
         return
 
     update_iam_token(shift_left_inline_data)
@@ -61,20 +69,20 @@ def perform_shift_left(args: List[str]):
         while True:
             try:
                 time.sleep(30)
-                print(f"Checking the status for the file: {file}")
+                logging.info(f"Checking the status for the file: {file}")
                 headers = {"x-access-token": shift_left_inline_data.access_token, "Content-Type": "application/json"}
                 status_response = requests.get(message, headers=headers)
             except requests.exceptions.RequestException as e:
                 if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code == 401:
                     update_access_token(shift_left_inline_data)
                     continue
-                print(f"Error while getting the status of the scan for file: {file} for scan with exception: {e}")
+                logging.error(f"Error while getting the status of the scan for file: {file} for scan with exception: {e}")
                 continue
 
             scan_eval_response = status_response.json()
 
             if scan_eval_response["status"] in ("Submitted", "In Progress"):
-                print(scan_eval_response["message"])
+                logging.info(scan_eval_response["message"])
                 continue
 
             if scan_eval_response["status"].lower() == "failure":
@@ -87,12 +95,11 @@ def perform_shift_left(args: List[str]):
 
             if violation_count > 0:
                 violated_files.append(file_name)
-                msg = f"{violation_count} violations were found for the file: {file_name}. Violated the policies: {policies_violated}"
-                print(msg)
+                logging.info(f"{violation_count} violations were found for the file: {file_name}. Violated the policies: {policies_violated}")
                 break
 
             elif violation_count == 0:
-                print(f"No violations were found for the file: {file_name}")
+                logging.info(f"No violations were found for the file: {file_name}")
                 break
 
     if violated_files:
@@ -114,7 +121,7 @@ def update_iam_token(shift_left_inline_data):
 
     if request.status_code != 200:
         error_msg = f"Unable to fetch IAM token for user: {shift_left_inline_data.user_name}"
-        print(error_msg)
+        #logging.error(error_msg)
         raise ShiftLeftInlineException(error_msg)
 
     token_response = request.json()
@@ -122,7 +129,7 @@ def update_iam_token(shift_left_inline_data):
     if token_response:
         shift_left_inline_data.iam_token = token_response.get('access_token')
 
-        print(f"Successfully received the IAM token for user: {shift_left_inline_data.user_name}")
+        logging.info(f"Successfully received the IAM token for user: {shift_left_inline_data.user_name}")
 
 def update_access_token(shift_left_inline_data):
     headers = {
@@ -138,7 +145,7 @@ def update_access_token(shift_left_inline_data):
     
     if request.status_code != 200:
         error_msg = f"Unable to fetch access token from IAM token."
-        print(error_msg)
+        #logging.error(error_msg)
         raise ShiftLeftInlineException(error_msg)
 
     token_response = request.json()
@@ -146,7 +153,7 @@ def update_access_token(shift_left_inline_data):
     if token_response:
         shift_left_inline_data.access_token = token_response.get('access_token')
 
-        print(f"Successfully received the access token from IAM token.")
+        logging.info(f"Successfully received the access token from IAM token.")
 
 def format_prepped_request(prepped, encoding=None):
     # prepped has .method, .path_url, .headers and .body attribute to view the request
@@ -189,14 +196,14 @@ def submit_file_for_scan(file_name: str, shift_left_inline_data: Dict[str, Any])
             if isinstance(e, HTTPError) and e.response.status_code == 401:
                 update_access_token(shift_left_inline_data)
                 return submit_file_for_scan(file_name, shift_left_inline_data)
-            print(f"Error while submitting {file_name} for scan due to : {str(e)}")
+            logging.error(f"Error while submitting {file_name} for scan due to : {str(e)}")
             raise e
         else:
             if response.status_code == 429:
-                print(f"Server is busy (reponse code 429), trying {file_name} again in 60 seconds.")
+                logging.info(f"Server is busy (reponse code 429), trying {file_name} again in 60 seconds.")
                 time.sleep(60)
             else:   
-                print(f"Successfully submitted {file_name} ({files_size} bytes) for scan")
+                logging.info(f"Successfully submitted {file_name} ({files_size} bytes) for scan")
                 return {"status_code": response.status_code, "text": response.text}
     
 if __name__ == "__main__":
