@@ -68,6 +68,7 @@ def perform_shift_left(args: List[str]):
 
     for file in shift_left_inline_data.changes:
         response = submit_file_for_scan(strip_leading_dot_slash(file), shift_left_inline_data)
+        submit_timestamp = time.time()
         if response is None:
             continue
 
@@ -80,7 +81,7 @@ def perform_shift_left(args: List[str]):
         while True:
             try:
                 time.sleep(30)
-                logging.info(f"Checking the status for the file: {file}")
+                logging.info(f"Checking the status for the file: {file} (Processing for {time.time() - submit_timestamp} seconds)")
                 headers = {"x-access-token": shift_left_inline_data.access_token, "Content-Type": "application/json"}
                 status_response = requests.get(message, headers=headers)
             except requests.exceptions.RequestException as e:
@@ -110,7 +111,7 @@ def perform_shift_left(args: List[str]):
                 break
 
             elif violation_count == 0:
-                logging.info(f"No violations were found for the file: {file_name}")
+                logging.info(f"No violations were found for the file: {file_name} (Processed for {time.time() - submit_timestamp} seconds)")
                 break
 
     if violated_files:
