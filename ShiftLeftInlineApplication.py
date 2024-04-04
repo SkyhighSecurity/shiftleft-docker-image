@@ -32,6 +32,11 @@ class ShiftLeftInlineData:
         self.iam_token = ""
 
 def strip_leading_dot_slash(filename: str) -> str:
+    if filename.startswith("./"):
+        return filename[2:]
+    return filename
+
+def clean_filename(filename: str) -> str:
     fields = filename.split('/')
     # Check if the string was split into multiple parts
     if len(fields) == 1:
@@ -40,6 +45,7 @@ def strip_leading_dot_slash(filename: str) -> str:
     else:
         # Otherwise, return the last field
         return fields[-1]
+
 
 def perform_shift_left(args: List[str]):
     shift_left_inline_data = ShiftLeftInlineData()
@@ -172,10 +178,9 @@ def submit_file_for_scan(file_name: str, shift_left_inline_data: Dict[str, Any])
 
     url = f'{shift_left_inline_data.environment}/neo/config-audit/devops/v1/scan?service={shift_left_inline_data.csp_name}'
 
-
     while True:
         try:
-            payload = {'filename': file_name}
+            payload = {'filename': clean_filename(file_name)}
             files = [
                 ('templateFile',(file_name,open(os.path.join(shift_left_inline_data.clone_dir, file_name))))
             ]
