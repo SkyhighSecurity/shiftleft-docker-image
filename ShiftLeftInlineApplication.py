@@ -32,9 +32,14 @@ class ShiftLeftInlineData:
         self.iam_token = ""
 
 def strip_leading_dot_slash(filename: str) -> str:
-    if filename.startswith("./"):
-        return filename[2:]
-    return filename
+    fields = filename.split('/')
+    # Check if the string was split into multiple parts
+    if len(fields) == 1:
+        # If not, return the original string
+        return filename
+    else:
+        # Otherwise, return the last field
+        return fields[-1]
 
 def perform_shift_left(args: List[str]):
     shift_left_inline_data = ShiftLeftInlineData()
