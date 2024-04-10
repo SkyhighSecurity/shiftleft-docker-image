@@ -73,7 +73,7 @@ def perform_shift_left(args: List[str]):
             continue
 
         submit_response = json.loads(response["text"])
-        logging.debug(f"Raw server response: {response["text"]}")
+        logging.debug(response["text"])
         status = submit_response["status"]
         message = submit_response["message"]
         if status.lower() == "failure":
