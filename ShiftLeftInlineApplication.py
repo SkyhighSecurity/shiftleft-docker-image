@@ -73,11 +73,12 @@ def perform_shift_left(args: List[str]):
             continue
 
         submit_response = json.loads(response["text"])
+        logging.debug(response["text"])
         status = submit_response["status"]
         message = submit_response["message"]
         if status.lower() == "failure":
             raise ShiftLeftInlineException(message)
-
+        
         while True:
             try:
                 time.sleep(30)
@@ -107,7 +108,7 @@ def perform_shift_left(args: List[str]):
 
             if violation_count > 0:
                 violated_files.append(file_name)
-                logging.info(f"{violation_count} violations were found for the file: {file_name}. Violated the policies: {policies_violated}")
+                logging.info(f"{violation_count} violations were found for the file: {file_name}. Violated the policies: {policies_violated} (Processed for {time.time() - submit_timestamp} seconds)" )
                 break
 
             elif violation_count == 0:
