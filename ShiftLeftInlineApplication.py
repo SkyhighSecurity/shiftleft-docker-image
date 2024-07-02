@@ -76,8 +76,10 @@ def perform_shift_left(args: List[str]):
         logging.debug(response["text"])
         status = submit_response["status"]
         message = submit_response["message"]
+        if isinstance(status, int):
+            raise ShiftLeftInlineException(submit_response)
         if status.lower() == "failure":
-            raise ShiftLeftInlineException(message)
+            raise ShiftLeftInlineException(submit_response)
         
         while True:
             try:
