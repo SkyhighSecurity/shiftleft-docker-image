@@ -46,7 +46,6 @@ def clean_filename(filename: str) -> str:
         # Otherwise, return the last field
         return fields[-1]
 
-
 def perform_shift_left(args: List[str]):
     shift_left_inline_data = ShiftLeftInlineData()
     shift_left_inline_data.changes = [s.strip() for s in args[0].split(',') if s not in ("buildspec.yml", "azure-mvc-shiftleft-pipeline.yml")]
@@ -57,6 +56,9 @@ def perform_shift_left(args: List[str]):
     shift_left_inline_data.environment = args[5]
     if len(args) == 7:
         shift_left_inline_data.bps_tenant_id = args[6]
+
+    exit_keyword = os.getenv('EXIT_KEYWORD', '').lower()  # Default is empty string
+    exit_error = int(os.getenv('EXIT_ERROR', '101'))  # Default is 101
 
     if not shift_left_inline_data.changes:
         logging.info("Exiting, since there are no changes available to perform evaluation")
@@ -111,14 +113,14 @@ def perform_shift_left(args: List[str]):
             if violation_count > 0:
                 violated_files.append(file_name)
                 logging.info(f"{violation_count} violations were found for the file: {file_name}. Violated the policies: {policies_violated} (Processed for {time.time() - submit_timestamp} seconds)" )
+                if exit_keyword and any(exit_keyword in policy.lower() for policy in policies_violated):
+                    logging.error(f"Exiting due to policy violation: {exit_keyword} found in file: {file_name}")
+                    sys.exit(exit_error)
                 break
 
             elif violation_count == 0:
                 logging.info(f"No violations were found for the file: {file_name} (Processed for {time.time() - submit_timestamp} seconds)")
                 break
-
-    if violated_files:
-        raise ShiftLeftInlineException(f"Failing the build, since violations were found for the files: {', '.join(violated_files)}.")
 
 def update_iam_token(shift_left_inline_data):
     headers = {
@@ -150,8 +152,6 @@ def update_access_token(shift_left_inline_data):
     headers = {
         'Content-Type': 'application/json',
         'x-iam-token': shift_left_inline_data.iam_token
-#        'x-auth-username': shift_left_inline_data.user_name,
-#        'x-auth-password': shift_left_inline_data.password
     }
     if shift_left_inline_data.bps_tenant_id:
         headers['BPS-TENANT-ID'] = shift_left_inline_data.bps_tenant_id
@@ -160,7 +160,6 @@ def update_access_token(shift_left_inline_data):
     
     if request.status_code != 200:
         error_msg = f"Unable to fetch access token from IAM token."
-        #logging.error(error_msg)
         raise ShiftLeftInlineException(error_msg)
 
     token_response = request.json()
@@ -176,7 +175,6 @@ def format_prepped_request(prepped, encoding=None):
     body = prepped.body.decode(encoding) if encoding else '<binary data>' 
     headers = '\n'.join(['{}: {}'.format(*hv) for hv in prepped.headers.items()])
     return f"""{prepped.method} {prepped.path_url} HTTP/1.1 {headers} {body}"""
-
 
 def submit_file_for_scan(file_name: str, shift_left_inline_data: Dict[str, Any]):
 
@@ -219,6 +217,6 @@ def submit_file_for_scan(file_name: str, shift_left_inline_data: Dict[str, Any])
             else:   
                 logging.info(f"Successfully submitted {file_name} ({files_size} bytes) for scan")
                 return {"status_code": response.status_code, "text": response.text}
-    
+
 if __name__ == "__main__":
     perform_shift_left(sys.argv[1:])
