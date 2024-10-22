@@ -58,7 +58,7 @@ def perform_shift_left(args: List[str]):
         shift_left_inline_data.bps_tenant_id = args[6]
 
     exit_keyword = os.getenv('EXIT_KEYWORD', '').lower()  # Default is empty string
-    exit_error = int(os.getenv('EXIT_ERROR', '101'))  # Default is 101
+    exit_error = int(os.getenv('EXIT_ERROR', '1'))  # Default is 1, standard exit error
 
     if not shift_left_inline_data.changes:
         logging.info("Exiting, since there are no changes available to perform evaluation")
