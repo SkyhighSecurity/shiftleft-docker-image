@@ -114,8 +114,10 @@ def perform_shift_left(args: List[str]):
                 violated_files.append(file_name)
                 logging.info(f"{violation_count} violations were found for the file: {file_name}. Violated the policies: {policies_violated} (Processed for {time.time() - submit_timestamp} seconds)" )
                 if exit_keyword and any(exit_keyword in policy.lower() for policy in policies_violated):
-                    logging.error(f"Exiting due to policy violation: {exit_keyword} found in file: {file_name}")
+                    logging.error(f"Exiting special code due to keyword violation: {exit_keyword} found in file: {file_name}")
                     sys.exit(exit_error)
+                else:
+                    sys.exit(1)
                 break
 
             elif violation_count == 0:
